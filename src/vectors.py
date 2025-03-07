@@ -18,7 +18,7 @@ class _Vector:
         elif isinstance(value, Number):
             return _Vector([val + value for val in self._values])
         else:
-            raise Exception(f"Attempted to add type {type(value).__name__} to a Vector{len(self._values)}")
+            raise TypeError(f"Attempted to add type {type(value).__name__} to a Vector{len(self._values)}")
     
     def __sub__(self, value):
         if isinstance(value, _Vector):
@@ -26,26 +26,26 @@ class _Vector:
         elif isinstance(value, Number):
             return _Vector([val - value for val in self._values])
         else:
-            raise Exception(f"Attempted to add type {type(value).__name__} to a Vector{len(self._values)}")
+            raise TypeError(f"Attempted to add type {type(value).__name__} to a Vector{len(self._values)}")
     
     def __mul__(self, value: Number):
-        if not isinstance(value, Number):  raise Exception(f"Attempted to multiply a Vector by type {type(value).__name__}")
+        if not isinstance(value, Number):  raise TypeError(f"Attempted to multiply a Vector by type {type(value).__name__}")
         return _Vector([val * value for val in self._values])
     
     def __truediv__(self, value: Number):
-        if not isinstance(value, Number):  raise Exception(f"Attempted to divide a Vector by type {type(value).__name__}")
+        if not isinstance(value, Number):  raise TypeError(f"Attempted to divide a Vector by type {type(value).__name__}")
         return _Vector([val / value for val in self._values])
     
     def __mod__(self, value: Number):
-        if not isinstance(value, Number):  raise Exception(f"Attempted to use the modulo operation on a Vector with type {type(value).__name__}")
+        if not isinstance(value, Number):  raise TypeError(f"Attempted to use the modulo operation on a Vector with type {type(value).__name__}")
         return _Vector([val % value for val in self._values])
     
     def __floordiv__(self, value: Number):
-        if not isinstance(value, Number):  raise Exception(f"Attempted to use the floordiv operation on a Vector with type {type(value).__name__}")
+        if not isinstance(value, Number):  raise TypeError(f"Attempted to use the floordiv operation on a Vector with type {type(value).__name__}")
         return _Vector([val // value for val in self._values])
     
     def __pow__(self, value: Number):
-        if not isinstance(value, Number):  raise Exception(f"Attempted to use the power operation on a Vector with type {type(value).__name__}")
+        if not isinstance(value, Number):  raise TypeError(f"Attempted to use the power operation on a Vector with type {type(value).__name__}")
         return _Vector([val ** value for val in self._values])
     
     def __eq__(self, value):
@@ -54,6 +54,16 @@ class _Vector:
     
     def __str__(self) -> str:
         return str(list(map(float, self._values)))[1:-1]
+    
+    
+    def dot(self, vector) -> Number:
+        if not issubclass(vector, _Vector):  raise TypeError("Trying to perform the dot product on a non-vector")
+        if len(self._values) != len(vector._values):  raise ValueError("Vectors must be of the same length")
+
+        product = 0
+        for i, val in enumerate(self._values):  product += val * vector._values[i]
+        
+        return product
     
 class Vector2(_Vector):
     def __init__(self, x: Number, y: Number):
@@ -70,8 +80,21 @@ class Vector2(_Vector):
     def yx(self) -> Number:  return self.y, self.x
 
 class Vector3(_Vector):
-    def __init__(self, x: Number, y: Number):
-        super().__init__(x, y)
+    def __init__(self, x: Number, y: Number, z: Number):
+        super().__init__(x, y, z)
+        
+    def cross(self, vector):
+        if not issubclass(vector, _Vector):  raise TypeError("Trying to perform the cross product on a non-vector")
+        if self._values != 3 or vector._values != 3:  raise ValueError("Both vectors must be 3-dimensional")
+        
+        A = self._values
+        B = vector._values
+
+        X = A[1] * B[2] - A[2] * B[1]
+        Y = A[2] * B[0] - A[0] * B[2]
+        Z = A[0] * B[1] - A[1] * B[0]
+        
+        return Vector3(X, Y, Z)
         
     @property
     def x(self) -> Number:  return self._values[0]
